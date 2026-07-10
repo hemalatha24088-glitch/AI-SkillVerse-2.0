@@ -242,7 +242,7 @@ const RoadmapGenerator = () => {
                               isCompleted 
                                 ? 'bg-[#faefd9]/50 border-amber-200/50 dark:bg-amber-900/10 dark:border-amber-900/30' 
                                 : 'bg-surface hover:bg-[#F5F1EB] border-[#E8E1D8] dark:hover:bg-dark-card dark:border-dark-border'
-                            }\`}
+                            }`}
                           >
                             <button className="mt-0.5 shrink-0 text-amber-500 focus:outline-none">
                               {isCompleted ? (
