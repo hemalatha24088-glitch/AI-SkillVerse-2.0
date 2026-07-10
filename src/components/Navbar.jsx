@@ -89,22 +89,34 @@ const Navbar = ({ setSidebarOpen }) => {
 
         {/* Right Actions */}
         <div className="flex items-center gap-4">
-          {/* Right Nav Links (Dashboard, Admin) */}
+          {/* Right Nav Links (Admin, Dashboard) */}
           {isAuthenticated && (
-            <div className="hidden lg:flex items-center">
-              {visibleLinks.filter(l => l.name !== 'Home').map((link) => (
+            <div className="hidden lg:flex items-center gap-2">
+              {visibleLinks.find(l => l.name === 'Admin') && (
                 <Link
-                  key={link.name}
-                  to={link.path}
+                  to="/admin"
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-150
-                    ${isActive(link.path)
+                    ${isActive('/admin')
                       ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
                       : 'text-ink-muted hover:text-ink hover:bg-surface-raised dark:text-dark-muted dark:hover:text-[#EDE8DF] dark:hover:bg-dark-card'
                     }`}
                 >
-                  {link.name}
+                  Admin
                 </Link>
-              ))}
+              )}
+              
+              {visibleLinks.find(l => l.name === 'Dashboard') && (
+                <Link
+                  to="/dashboard"
+                  className={`px-4 py-1.5 rounded-md text-sm font-bold text-white transition-colors duration-150 shadow-sm border border-red-700/50
+                    ${isActive('/dashboard')
+                      ? 'bg-red-700 hover:bg-red-800'
+                      : 'bg-red-600 hover:bg-red-700'
+                    }`}
+                >
+                  Dashboard
+                </Link>
+              )}
             </div>
           )}
 
