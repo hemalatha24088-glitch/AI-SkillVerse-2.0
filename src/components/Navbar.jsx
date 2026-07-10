@@ -39,6 +39,8 @@ const Navbar = () => {
     { name: 'AI Mentor',  path: '/ai-mentor' },
     { name: 'Playground', path: '/playground' },
     { name: 'News',       path: '/daily-updates' },
+    { name: 'AI Trends',  path: '/gen-ai-trends' },
+    { name: 'AI Tech',    path: '/latest-ai' },
     { name: 'Admin',      path: '/admin' },
   ];
 
