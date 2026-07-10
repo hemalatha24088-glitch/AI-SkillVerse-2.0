@@ -209,7 +209,7 @@ const RoadmapGenerator = () => {
                   <div className="w-full h-1.5 bg-[#E8E1D8] dark:bg-dark-border rounded-full overflow-hidden">
                     <div 
                       className="h-full bg-amber-500 rounded-full transition-all duration-500 ease-out"
-                      style={{ width: \`\${progressPercent}%\` }}
+                      style={{ width: `${progressPercent}%` }}
                     />
                   </div>
                 </div>
@@ -231,14 +231,14 @@ const RoadmapGenerator = () => {
                     {/* Task Checklist */}
                     <div className="space-y-3">
                       {phase.tasks.map((task, tIdx) => {
-                        const taskId = \`\${pIdx}-\${tIdx}\`;
+                        const taskId = `${pIdx}-${tIdx}`;
                         const isCompleted = completedTasks.has(taskId);
                         
                         return (
                           <div 
                             key={taskId}
                             onClick={() => toggleTask(taskId)}
-                            className={\`flex items-start gap-3 p-3 rounded-lg border transition-all cursor-pointer \${
+                            className={`flex items-start gap-3 p-3 rounded-lg border transition-all cursor-pointer ${
                               isCompleted 
                                 ? 'bg-[#faefd9]/50 border-amber-200/50 dark:bg-amber-900/10 dark:border-amber-900/30' 
                                 : 'bg-surface hover:bg-[#F5F1EB] border-[#E8E1D8] dark:hover:bg-dark-card dark:border-dark-border'
@@ -253,7 +253,7 @@ const RoadmapGenerator = () => {
                                 <Circle className="w-5 h-5 text-[#C8BFB4] hover:text-amber-400 transition-colors" />
                               )}
                             </button>
-                            <span className={\`text-sm font-medium transition-colors \${isCompleted ? 'text-ink-muted line-through' : 'text-ink dark:text-[#EDE8DF]'}\`}>
+                            <span className={`text-sm font-medium transition-colors ${isCompleted ? 'text-ink-muted line-through' : 'text-ink dark:text-[#EDE8DF]'}`}>
                               {task}
                             </span>
                           </div>
