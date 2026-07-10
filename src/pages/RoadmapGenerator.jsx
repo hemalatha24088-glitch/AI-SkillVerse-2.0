@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Map, Target, Zap, Clock, BrainCircuit, Rocket, CheckCircle2 } from 'lucide-react';
-
-const OPENROUTER_API_KEY = "YOUR_API_KEY_HERE"; // Replace with your actual key or use environment variables
+import { callAI } from '../utils/callAI';
 
 const RoadmapGenerator = () => {
   const [loading, setLoading] = useState(false);
@@ -31,23 +30,8 @@ const RoadmapGenerator = () => {
     Keep it extremely actionable and concise. No fluff.`;
 
     try {
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: "openrouter/free",
-          messages: [{ role: "user", content: prompt }],
-          max_tokens: 2000
-        })
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error?.message || "Failed to generate");
-
-      setRoadmap(data.choices[0].message.content);
+      const text = await callAI([{ role: 'user', content: prompt }], 2000);
+      setRoadmap(text);
     } catch (err) {
       console.error(err);
       alert("Failed to generate roadmap. Please try again.");

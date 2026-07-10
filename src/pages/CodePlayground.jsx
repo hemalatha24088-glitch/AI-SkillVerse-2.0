@@ -1,8 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Terminal, Code2, Database, Lightbulb } from 'lucide-react';
-
-const OPENROUTER_API_KEY = "YOUR_API_KEY_HERE"; // Replace with your actual key or use environment variables
+import { callAI } from '../utils/callAI';
 
 const CodePlayground = () => {
   const [language, setLanguage] = useState('python');
@@ -59,24 +58,9 @@ const CodePlayground = () => {
         "errorHint": "If error, provide a concise friendly hint with the line number. If success, leave empty."
       }`;
 
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: "openrouter/free",
-          messages: [{ role: "user", content: AI_PROMPT }],
-          max_tokens: 1500
-        })
-      });
+      const messages = [{ role: 'user', content: AI_PROMPT }];
+      let content = await callAI(messages, 1500);
 
-      if (!response.ok) throw new Error("API Error");
-
-      const data = await response.json();
-      let content = data.choices[0].message.content;
-      
       const start = content.indexOf('{');
       const end = content.lastIndexOf('}');
       if (start !== -1 && end !== -1) {
@@ -103,7 +87,11 @@ const CodePlayground = () => {
           <motion.h1 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="text-3xl font-bold mb-2 flex items-center gap-2">
             <Code2 className="w-8 h-8 text-primary-500" /> Code <span className="text-gradient">Playground</span>
           </motion.h1>
-          <p className="text-slate-600 dark:text-slate-400 text-sm">Write, run, and test your code instantly.</p>
+          <p className="text-slate-600 dark:text-slate-400 text-sm">Write and test code with AI-powered simulation.</p>
+          <div className="mt-2 inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 text-xs font-medium px-3 py-1.5 rounded-full">
+            <span>🤖</span>
+            <span>Outputs are AI-simulated predictions — not guaranteed-accurate execution results.</span>
+          </div>
         </div>
         
         <div className="flex gap-4">

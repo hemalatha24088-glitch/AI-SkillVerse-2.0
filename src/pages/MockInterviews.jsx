@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Send, User, Briefcase, Building2, PlayCircle, Bot } from 'lucide-react';
-
-const OPENROUTER_API_KEY = "YOUR_API_KEY_HERE"; // Replace with your actual key or use environment variables
+import { callAI } from '../utils/callAI';
 
 const MockInterviews = () => {
   const [setupMode, setSetupMode] = useState(true);
@@ -60,26 +59,7 @@ const MockInterviews = () => {
       history.unshift({ role: 'system', content: SYSTEM_PROMPT });
       history.push({ role: 'user', content: userText });
 
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: "openrouter/free",
-          messages: history,
-          max_tokens: 1500
-        })
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error?.message || "OpenRouter API error");
-      }
-
-      const text = data.choices[0].message.content;
+      const text = await callAI(history, 1500);
       setMessages(prev => [...prev, { id: Date.now() + 1, sender: 'bot', text: text }]);
       
     } catch (error) {

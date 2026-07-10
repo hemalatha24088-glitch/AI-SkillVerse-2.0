@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Building2, Search, Filter, Lock, Loader2, Sparkles } from 'lucide-react';
+import { callAI } from '../utils/callAI';
 
 const defaultPyqs = [
   { id: 1, company: 'TCS', role: 'Ninja/Digital', skill: 'Java', difficulty: 'Medium', question: 'Write a program to reverse a string without using inbuilt functions.' },
@@ -60,7 +61,7 @@ const defaultPyqs = [
 const companies = ['All', 'TCS', 'Infosys', 'Wipro', 'Accenture', 'Capgemini', 'Cognizant', 'Microsoft', 'Google'];
 const skills = ['All', 'Java', 'Python', 'C++', 'SQL', 'DSA', 'React'];
 
-const OPENROUTER_API_KEY = "YOUR_API_KEY_HERE"; // Replace with your actual key or use environment variables
+
 
 const CompanyPYQs = () => {
   const [pyqs, setPyqs] = useState(defaultPyqs);
@@ -95,26 +96,7 @@ const CompanyPYQs = () => {
         "question": "The actual interview question text"
       }`;
 
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: "openrouter/free",
-          messages: [{ role: "user", content: AI_PROMPT }],
-          max_tokens: 2500
-        })
-      });
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error?.message || "OpenRouter Error");
-      }
-
-      const data = await response.json();
-      let content = data.choices[0].message.content;
+      let content = await callAI([{ role: 'user', content: AI_PROMPT }], 2500);
       
       const start = content.indexOf('[');
       const end = content.lastIndexOf(']');
@@ -126,7 +108,6 @@ const CompanyPYQs = () => {
       }
       
       const newQuestions = JSON.parse(content);
-      // Replace existing questions with the freshly generated ones
       setPyqs(newQuestions);
       
     } catch (err) {

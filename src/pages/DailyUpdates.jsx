@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Newspaper, RefreshCw, ExternalLink } from 'lucide-react';
-
-const OPENROUTER_API_KEY = "YOUR_API_KEY_HERE"; // Replace with your actual key or use environment variables
+import { callAI } from '../utils/callAI';
 
 const AI_PROMPT = `Generate exactly 4 fresh, realistic news headlines and short 2-sentence summaries about: 
 1. The current state of AI.
@@ -19,23 +18,8 @@ const DailyUpdates = () => {
   const fetchNews = async () => {
     setLoading(true);
     try {
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: "openrouter/free",
-          messages: [{ role: "user", content: AI_PROMPT }],
-          max_tokens: 2500
-        })
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error?.message || "OpenRouter Error");
-
-      let content = data.choices[0].message.content;
+      const messages = [{ role: 'user', content: AI_PROMPT }];
+      let content = await callAI(messages, 2500);
       
       // Handle reasoning models by extracting just the JSON array
       const start = content.indexOf('[');

@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Send, Bot, User, Sparkles, Volume2, VolumeX } from 'lucide-react';
-const OPENROUTER_API_KEY = "YOUR_API_KEY_HERE"; // Replace with your actual key or use environment variables
+import { callAI } from '../utils/callAI';
+
 const SYSTEM_PROMPT = "Your name is Ram. You are an AI Mentor for a computer science learning platform. You help students with DSA, SQL, C++, Java, Python, and AI. Keep responses clear, encouraging, and formatted with markdown when showing code.";
 
 const AIMentor = () => {
@@ -39,38 +40,14 @@ const AIMentor = () => {
     setIsTyping(true);
 
     try {
-      // Build history for OpenRouter
       const history = messages.map(m => ({
         role: m.sender === 'user' ? 'user' : 'assistant',
         content: m.text
       }));
-      
-      // Inject system prompt at the beginning
       history.unshift({ role: 'system', content: SYSTEM_PROMPT });
-      
-      // Add current message
       history.push({ role: 'user', content: userText });
 
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: "openrouter/free",
-          messages: history,
-          max_tokens: 2500
-        })
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error?.message || "OpenRouter API error");
-      }
-
-      const text = data.choices[0].message.content;
+      const text = await callAI(history, 2500);
       setMessages(prev => [...prev, { id: Date.now() + 1, sender: 'bot', text: text }]);
       
       if (voiceEnabled) {
