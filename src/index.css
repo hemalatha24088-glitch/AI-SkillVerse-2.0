@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-inter;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-outfit tracking-tight;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/70 dark:bg-dark-card/50 backdrop-blur-md border border-slate-200 dark:border-dark-border shadow-xl rounded-2xl;
+  }
+  
+  .glass-nav {
+    @apply bg-white/80 dark:bg-dark-bg/80 backdrop-blur-lg border-b border-slate-200 dark:border-dark-border;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-purple-500;
+  }
+
+  .btn-primary {
+    @apply px-6 py-3 rounded-full font-medium text-white bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-500 hover:to-purple-500 transition-all duration-300 shadow-[0_0_20px_rgba(99,102,241,0.4)] hover:shadow-[0_0_30px_rgba(99,102,241,0.6)];
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 rounded-full font-medium text-slate-900 dark:text-white bg-slate-100 dark:bg-dark-border hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors duration-300;
+  }
+}
+
+/* Custom Scrollbar for Code Playground/Sidebar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-400 dark:bg-slate-600;
+}
