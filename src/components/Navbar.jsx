@@ -1,112 +1,151 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Sun, Moon, BrainCircuit, User } from 'lucide-react';
+import { Menu, X, Sun, Moon, BrainCircuit, LayoutDashboard } from 'lucide-react';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isDark, setIsDark] = useState(true); // Default dark theme for futuristic vibe
+  const [isDark, setIsDark] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDark]);
+    const stored = localStorage.getItem('sv_theme');
+    const dark = stored === 'dark';
+    setIsDark(dark);
+    document.documentElement.classList.toggle('dark', dark);
+  }, []);
 
-  const toggleTheme = () => setIsDark(!isDark);
-  const toggleMenu = () => setIsOpen(!isOpen);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const toggleTheme = () => {
+    const next = !isDark;
+    setIsDark(next);
+    document.documentElement.classList.toggle('dark', next);
+    localStorage.setItem('sv_theme', next ? 'dark' : 'light');
+  };
 
   const navLinks = [
-    { name: 'Home', path: '/home' },
-    { name: 'Roadmap', path: '/roadmap' },
-    { name: 'Resume', path: '/career-tools' },
-    { name: 'Skills', path: '/skills' },
-    { name: 'Quizzes', path: '/quizzes' },
+    { name: 'Home',       path: '/home' },
+    { name: 'Roadmap',    path: '/roadmap' },
+    { name: 'Resume',     path: '/career-tools' },
+    { name: 'Skills',     path: '/skills' },
+    { name: 'Quizzes',    path: '/quizzes' },
     { name: 'Interviews', path: '/mock-interviews' },
-    { name: 'PYQs', path: '/pyqs' },
-    { name: 'AI Mentor', path: '/ai-mentor' },
+    { name: 'PYQs',       path: '/pyqs' },
+    { name: 'AI Mentor',  path: '/ai-mentor' },
     { name: 'Playground', path: '/playground' },
-    { name: 'News', path: '/daily-updates' },
-    { name: 'Admin', path: '/admin' },
+    { name: 'News',       path: '/daily-updates' },
+    { name: 'Admin',      path: '/admin' },
   ];
 
   const isActive = (path) => location.pathname === path;
   const isAuthenticated = localStorage.getItem('ai_skillverse_auth') === 'true';
   const role = localStorage.getItem('ai_skillverse_role');
 
-  const visibleNavLinks = navLinks.filter(link => {
-    if (link.name === 'Admin' && role !== 'admin') return false;
+  const visibleLinks = navLinks.filter(l => {
+    if (l.name === 'Admin' && role !== 'admin') return false;
     return true;
   });
 
   return (
-    <nav className="glass-nav fixed w-full top-0 z-50 px-4 md:px-8 lg:px-16 py-4 flex items-center justify-between">
-      <Link to={isAuthenticated ? "/home" : "/"} className="flex items-center gap-2 group">
-        <BrainCircuit className="w-8 h-8 text-primary-500 group-hover:text-purple-500 transition-colors" />
-        <span className="text-xl font-bold font-outfit text-gradient">AI SkillVerse</span>
-      </Link>
+    <nav className={`navbar transition-shadow duration-200 ${scrolled ? 'shadow-card' : ''}`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
 
-      {/* Desktop Nav */}
-      <div className="hidden md:flex items-center gap-6">
-        {isAuthenticated && visibleNavLinks.map((link) => (
-          <Link
-            key={link.name}
-            to={link.path}
-            className={`font-medium transition-colors hover:text-primary-500 ${isActive(link.path) ? 'text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-300'}`}
-          >
-            {link.name}
-          </Link>
-        ))}
-      </div>
+        {/* Logo */}
+        <Link to={isAuthenticated ? '/home' : '/'} className="flex items-center gap-2">
+          <BrainCircuit className="w-6 h-6 text-amber-500" />
+          <span className="font-fraunces font-semibold text-lg text-ink dark:text-[#EDE8DF] tracking-tight">
+            AI SkillVerse
+          </span>
+        </Link>
 
-      <div className="hidden md:flex items-center gap-4">
-        <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-slate-300">
-          {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-        </button>
-        {isAuthenticated ? (
-          <Link to="/dashboard" className="flex items-center gap-2 px-4 py-2 rounded-full border border-primary-500/30 hover:bg-primary-500/10 transition-colors text-primary-600 dark:text-primary-400 font-medium">
-            <User className="w-4 h-4" />
-            Dashboard
-          </Link>
-        ) : (
-          <Link to="/" className="flex items-center gap-2 px-4 py-2 rounded-full border border-primary-500/30 hover:bg-primary-500/10 transition-colors text-primary-600 dark:text-primary-400 font-medium">
-            <User className="w-4 h-4" />
-            Login
-          </Link>
-        )}
-      </div>
-
-      {/* Mobile Menu Toggle */}
-      <div className="md:hidden flex items-center gap-4">
-        <button onClick={toggleTheme} className="p-2 text-slate-600 dark:text-slate-300">
-          {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-        </button>
+        {/* Desktop Nav Links */}
         {isAuthenticated && (
-          <button onClick={toggleMenu} className="text-slate-600 dark:text-slate-300">
-            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          <div className="hidden lg:flex items-center gap-1">
+            {visibleLinks.map((link) => (
+              <Link
+                key={link.name}
+                to={link.path}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-150
+                  ${isActive(link.path)
+                    ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
+                    : 'text-ink-muted hover:text-ink hover:bg-surface-raised dark:text-dark-muted dark:hover:text-[#EDE8DF] dark:hover:bg-dark-card'
+                  }`}
+              >
+                {link.name}
+              </Link>
+            ))}
+          </div>
         )}
+
+        {/* Right Actions */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggleTheme}
+            className="btn-ghost p-2 rounded-lg"
+            aria-label="Toggle theme"
+          >
+            {isDark
+              ? <Sun className="w-4 h-4" />
+              : <Moon className="w-4 h-4" />
+            }
+          </button>
+
+          {isAuthenticated ? (
+            <Link to="/dashboard" className="btn-primary hidden sm:inline-flex">
+              <LayoutDashboard className="w-4 h-4" />
+              Dashboard
+            </Link>
+          ) : (
+            <Link to="/" className="btn-primary hidden sm:inline-flex">
+              Sign in
+            </Link>
+          )}
+
+          {/* Mobile toggle */}
+          {isAuthenticated && (
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="lg:hidden btn-ghost p-2"
+              aria-label="Menu"
+            >
+              {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Mobile Nav */}
+      {/* Mobile Dropdown */}
       {isOpen && isAuthenticated && (
-        <div className="absolute top-full left-0 w-full glass-nav flex flex-col p-4 gap-4 md:hidden shadow-xl border-t border-slate-200 dark:border-dark-border">
-          {visibleNavLinks.map((link) => (
+        <div className="lg:hidden border-t border-[#E8E1D8] dark:border-dark-border bg-paper dark:bg-dark-paper shadow-elevated">
+          <div className="max-w-7xl mx-auto px-4 py-3 grid grid-cols-2 gap-1">
+            {visibleLinks.map((link) => (
+              <Link
+                key={link.name}
+                to={link.path}
+                onClick={() => setIsOpen(false)}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                  ${isActive(link.path)
+                    ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
+                    : 'text-ink-muted hover:bg-surface-raised dark:text-dark-muted dark:hover:bg-dark-card'
+                  }`}
+              >
+                {link.name}
+              </Link>
+            ))}
             <Link
-              key={link.name}
-              to={link.path}
+              to="/dashboard"
               onClick={() => setIsOpen(false)}
-              className={`font-medium p-2 rounded-lg ${isActive(link.path) ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-300'}`}
+              className="btn-primary col-span-2 mt-2"
             >
-              {link.name}
+              <LayoutDashboard className="w-4 h-4" />
+              Dashboard
             </Link>
-          ))}
-          <Link to="/dashboard" onClick={() => setIsOpen(false)} className="flex items-center justify-center gap-2 p-3 mt-2 rounded-lg bg-primary-600 text-white font-medium">
-            <User className="w-4 h-4" />
-            Dashboard
-          </Link>
+          </div>
         </div>
       )}
     </nav>
