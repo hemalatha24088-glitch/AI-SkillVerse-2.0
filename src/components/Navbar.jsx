@@ -67,10 +67,10 @@ const Navbar = ({ setSidebarOpen }) => {
             </Link>
           </div>
 
-          {/* Left Nav Links (Dashboard, Admin) */}
+          {/* Left Nav Links (Home) */}
           {isAuthenticated && (
             <div className="hidden lg:flex items-center gap-1">
-              {visibleLinks.filter(l => l.name !== 'Home').map((link) => (
+              {visibleLinks.filter(l => l.name === 'Home').map((link) => (
                 <Link
                   key={link.name}
                   to={link.path}
@@ -89,10 +89,10 @@ const Navbar = ({ setSidebarOpen }) => {
 
         {/* Right Actions */}
         <div className="flex items-center gap-4">
-          {/* Right Nav Links (Home) */}
+          {/* Right Nav Links (Dashboard, Admin) */}
           {isAuthenticated && (
             <div className="hidden lg:flex items-center">
-              {visibleLinks.filter(l => l.name === 'Home').map((link) => (
+              {visibleLinks.filter(l => l.name !== 'Home').map((link) => (
                 <Link
                   key={link.name}
                   to={link.path}
