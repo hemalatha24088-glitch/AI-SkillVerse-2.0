@@ -5,8 +5,8 @@ const AdminRoute = ({ children }) => {
   const isAuthenticated = localStorage.getItem('ai_skillverse_auth') === 'true';
   const role = localStorage.getItem('ai_skillverse_role');
 
-  if (!isAuthenticated || role !== 'admin') {
-    // Redirect non-admins to dashboard
+  if (!isAuthenticated) {
+    // Redirect unauthenticated to dashboard
     return <Navigate to="/dashboard" replace />;
   }
 
