@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { CheckCircle2, XCircle, Award, RefreshCcw } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircle2, XCircle, Award, RefreshCcw, ArrowRight, Brain, Target, BarChart2 } from 'lucide-react';
 
 const quizDataDB = {
   Global: [
@@ -61,7 +61,10 @@ const QuizSystem = () => {
   const [currentQ, setCurrentQ] = useState(0);
   const [selected, setSelected] = useState(null);
   const [showResult, setShowResult] = useState(false);
+  
+  // Track stats for the final report
   const [score, setScore] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
   const [quizFinished, setQuizFinished] = useState(false);
 
   // Load custom quizzes from localStorage and merge with DB
@@ -77,10 +80,8 @@ const QuizSystem = () => {
     }];
   });
 
-  // Default to Global if not started to avoid undefined, but we won't render it
   const quizData = mergedQuizData[currentSkill] || mergedQuizData['Global'];
 
-  // Load points from local storage on mount
   useEffect(() => {
     const savedPoints = localStorage.getItem('ai_skillverse_points');
     if (!savedPoints) localStorage.setItem('ai_skillverse_points', '0');
@@ -96,6 +97,7 @@ const QuizSystem = () => {
     setShowResult(true);
     if (selected === quizData[currentQ].answer) {
       setScore(score + 10);
+      setCorrectCount(correctCount + 1);
     }
   };
 
@@ -107,22 +109,18 @@ const QuizSystem = () => {
     } else {
       setQuizFinished(true);
       
-      // Update global total quizzes metric
       const totalQuizzes = parseInt(localStorage.getItem('ai_skillverse_total_quizzes') || '45210');
       localStorage.setItem('ai_skillverse_total_quizzes', (totalQuizzes + 1).toString());
 
-      // Update global points
       const currentPoints = parseInt(localStorage.getItem('ai_skillverse_points') || '0');
       localStorage.setItem('ai_skillverse_points', (currentPoints + score).toString());
       
-      // Update skill-specific points if not Global
       if (currentSkill !== 'Global') {
         const skillKey = `ai_skillverse_points_${currentSkill.toLowerCase()}`;
         const currentSkillPoints = parseInt(localStorage.getItem(skillKey) || '0');
         localStorage.setItem(skillKey, (currentSkillPoints + score).toString());
       }
       
-      // Update mocked user in leaderboard
       const users = JSON.parse(localStorage.getItem('ai_skillverse_users') || '[]');
       if(users.length > 0) {
         users[0].points += score;
@@ -134,149 +132,212 @@ const QuizSystem = () => {
     }
   };
 
-  const restartQuiz = () => {
-    setCurrentQ(0);
-    setSelected(null);
-    setShowResult(false);
-    setScore(0);
-    setQuizFinished(false);
-  };
-
   const selectSkillAndRestart = (skill) => {
     setCurrentSkill(skill);
     setCurrentQ(0);
     setSelected(null);
     setShowResult(false);
     setScore(0);
+    setCorrectCount(0);
     setQuizFinished(false);
     setQuizStarted(true);
   };
 
-  return (
-    <div className="pb-20 pt-10 max-w-3xl mx-auto">
-      <div className="text-center mb-8">
-        <motion.h1 initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-4xl font-bold mb-4">
-          Interactive <span className="text-gradient">Quizzes</span>
-        </motion.h1>
-      </div>
+  // Calculate Progress
+  const progressPercent = quizStarted && !quizFinished ? ((currentQ + 1) / quizData.length) * 100 : 0;
+  const maxPossibleScore = quizData.length * 10;
+  const accuracyPercent = quizFinished ? Math.round((correctCount / quizData.length) * 100) : 0;
 
+  return (
+    <div className="page-container flex flex-col items-center pt-24 pb-20">
+      
       {!quizStarted ? (
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="glass-card p-10 text-center">
-          <Award className="w-20 h-20 text-primary-500 mx-auto mb-6" />
-          <h2 className="text-3xl font-bold mb-4">Ready to test your knowledge?</h2>
-          <p className="text-slate-600 dark:text-slate-400 mb-8">Select a skill below to start a specific quiz and earn points for the leaderboard!</p>
-          
-          <div className="flex flex-wrap justify-center gap-3">
+        <div className="w-full max-w-4xl space-y-12">
+          <div className="text-center space-y-4">
+            <span className="tag">Assessments</span>
+            <h1 className="text-display text-4xl md:text-5xl font-semibold">Test your knowledge</h1>
+            <p className="text-ink-muted max-w-lg mx-auto">
+              Select a domain below to take a quick assessment. Gain leaderboard points and find gaps in your understanding.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {Object.keys(mergedQuizData).filter(skill => skill !== 'Global').map(skill => (
               <button
                 key={skill}
                 onClick={() => selectSkillAndRestart(skill)}
-                className="px-6 py-3 rounded-xl border-2 border-primary-500/30 hover:border-primary-500 hover:bg-primary-500/10 text-primary-600 dark:text-primary-400 font-bold transition-all transform hover:scale-105"
+                className="card-hover p-6 flex flex-col items-center text-center gap-3 bg-surface group"
               >
-                {skill} Quiz
+                <div className="w-12 h-12 rounded-full bg-[#faefd9] text-[#C77D30] flex items-center justify-center group-hover:bg-[#C77D30] group-hover:text-white transition-colors duration-200">
+                  <Brain className="w-6 h-6" />
+                </div>
+                <h3 className="font-fraunces text-xl font-medium text-ink dark:text-[#EDE8DF]">{skill}</h3>
+                <span className="text-sm font-medium text-amber-600 dark:text-amber-400 group-hover:underline">Start Quiz →</span>
               </button>
             ))}
           </div>
-        </motion.div>
+        </div>
       ) : !quizFinished ? (
-        <motion.div 
-          key={currentQ}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="glass-card p-8"
-        >
-          <div className="flex justify-between items-center mb-6 text-sm font-medium text-slate-500">
-            <span>Question {currentQ + 1} of {quizData.length}</span>
-            <span>Current Score: {score}</span>
-          </div>
-
-          <h2 className="text-xl md:text-2xl font-semibold mb-8">{quizData[currentQ].question}</h2>
-
-          <div className="space-y-4 mb-8">
-            {quizData[currentQ].options.map((opt, idx) => {
-              let btnClass = "w-full text-left p-4 rounded-xl border transition-all duration-200 font-medium ";
-              
-              if (!showResult) {
-                btnClass += selected === idx 
-                  ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 ring-2 ring-primary-500/20" 
-                  : "border-slate-200 dark:border-dark-border hover:border-primary-300 dark:hover:border-primary-700 bg-white/50 dark:bg-dark-bg/50";
-              } else {
-                if (idx === quizData[currentQ].answer) {
-                  btnClass += "border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300";
-                } else if (idx === selected) {
-                  btnClass += "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300";
-                } else {
-                  btnClass += "border-slate-200 dark:border-dark-border opacity-50";
-                }
-              }
-
-              return (
-                <button 
-                  key={idx} 
-                  onClick={() => handleSelect(idx)}
-                  disabled={showResult}
-                  className={btnClass}
-                >
-                  <div className="flex items-center justify-between">
-                    <span>{opt}</span>
-                    {showResult && idx === quizData[currentQ].answer && <CheckCircle2 className="w-5 h-5 text-green-500" />}
-                    {showResult && idx === selected && idx !== quizData[currentQ].answer && <XCircle className="w-5 h-5 text-red-500" />}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          {showResult && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-slate-100 dark:bg-slate-800 rounded-xl mb-8 border border-slate-200 dark:border-dark-border">
-              <p className="text-sm">
-                <span className="font-bold">Explanation:</span> {quizData[currentQ].explanation}
-              </p>
-            </motion.div>
-          )}
-
-          <div className="flex justify-end">
-            {!showResult ? (
-              <button 
-                onClick={handleSubmit} 
-                disabled={selected === null}
-                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Submit Answer
-              </button>
-            ) : (
-              <button onClick={handleNext} className="btn-primary">
-                {currentQ < quizData.length - 1 ? 'Next Question' : 'Finish Quiz'}
-              </button>
-            )}
-          </div>
-        </motion.div>
-      ) : (
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="glass-card p-10 text-center">
-          <Award className="w-20 h-20 text-yellow-500 mx-auto mb-6" />
-          <h2 className="text-3xl font-bold mb-2">{currentSkill} Quiz Completed!</h2>
-          <p className="text-slate-600 dark:text-slate-400 mb-8">You scored {score} points. These points have been added to your {currentSkill !== 'Global' ? `${currentSkill} and Global ranking` : 'Global ranking'}.</p>
-          
-          <div className="mb-8 border-t border-slate-200 dark:border-dark-border pt-6">
-            <h3 className="text-xl font-bold mb-4">Choose your next challenge:</h3>
-            <div className="flex flex-wrap justify-center gap-3">
-              {skillsList.map(skill => (
-                <button
-                  key={skill}
-                  onClick={() => selectSkillAndRestart(skill)}
-                  className="px-4 py-2 rounded-xl border border-primary-500/30 hover:bg-primary-500/10 text-primary-600 dark:text-primary-400 font-medium transition-colors"
-                >
-                  {skill} Quiz
-                </button>
-              ))}
+        <div className="w-full max-w-2xl">
+          {/* Progress Header */}
+          <div className="mb-8 space-y-4">
+            <div className="flex justify-between items-end">
+              <div>
+                <p className="section-label mb-1">{currentSkill} Assessment</p>
+                <h2 className="text-2xl font-semibold font-fraunces">Question {currentQ + 1} of {quizData.length}</h2>
+              </div>
+              <div className="text-right">
+                <span className="text-sm font-medium text-ink-muted">Score</span>
+                <div className="text-xl font-semibold text-amber-600">{score}</div>
+              </div>
+            </div>
+            
+            {/* Progress Bar */}
+            <div className="w-full h-2 bg-[#E8E1D8] dark:bg-dark-border rounded-full overflow-hidden">
+              <motion.div 
+                className="h-full bg-amber-500 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${progressPercent}%` }}
+                transition={{ duration: 0.3 }}
+              />
             </div>
           </div>
 
-          <div className="flex justify-center gap-4 border-t border-slate-200 dark:border-dark-border pt-6">
-            <button onClick={() => setQuizStarted(false)} className="btn-secondary flex items-center gap-2">
-              <RefreshCcw className="w-4 h-4" /> Change Skill
-            </button>
-            <a href="/leaderboard" className="btn-primary">View Leaderboard</a>
+          {/* Question Card */}
+          <div className="card p-6 md:p-8">
+            <h3 className="text-lg md:text-xl font-medium text-ink dark:text-[#EDE8DF] mb-6 leading-relaxed">
+              {quizData[currentQ].question}
+            </h3>
+
+            <div className="space-y-3 mb-8">
+              {quizData[currentQ].options.map((opt, idx) => {
+                
+                const isSelected = selected === idx;
+                const isCorrectAnswer = idx === quizData[currentQ].answer;
+                
+                // Base Option Style
+                let optionClass = "w-full text-left p-4 rounded-lg border-2 transition-all duration-200 flex items-center justify-between ";
+                
+                if (!showResult) {
+                  optionClass += isSelected 
+                    ? "border-amber-500 bg-[#faefd9] dark:bg-amber-900/20 text-amber-900 dark:text-amber-100"
+                    : "border-[#E8E1D8] dark:border-dark-border bg-surface dark:bg-dark-card text-ink dark:text-[#EDE8DF] hover:border-[#C8BFB4] dark:hover:border-dark-muted";
+                } else {
+                  if (isCorrectAnswer) {
+                    optionClass += "border-success bg-success-light dark:bg-success/20 text-success dark:text-success-light";
+                  } else if (isSelected && !isCorrectAnswer) {
+                    optionClass += "border-error bg-error-light dark:bg-error/20 text-error dark:text-error-light";
+                  } else {
+                    optionClass += "border-[#E8E1D8] dark:border-dark-border bg-surface dark:bg-dark-card opacity-50";
+                  }
+                }
+
+                return (
+                  <button 
+                    key={idx} 
+                    onClick={() => handleSelect(idx)}
+                    disabled={showResult}
+                    className={optionClass}
+                  >
+                    <span className="font-medium text-sm md:text-base">{opt}</span>
+                    
+                    {/* Animated Icon Reveal on Submit */}
+                    <AnimatePresence>
+                      {showResult && isCorrectAnswer && (
+                        <motion.div initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0 }}>
+                          <CheckCircle2 className="w-5 h-5 text-success" />
+                        </motion.div>
+                      )}
+                      {showResult && isSelected && !isCorrectAnswer && (
+                        <motion.div initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0 }}>
+                          <XCircle className="w-5 h-5 text-error" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Explanation Box */}
+            <AnimatePresence>
+              {showResult && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }} 
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="mb-8 overflow-hidden rounded-lg bg-surface-raised dark:bg-dark-border"
+                >
+                  <div className="p-4 border-l-4 border-amber-500">
+                    <p className="text-sm text-ink dark:text-[#EDE8DF] leading-relaxed">
+                      <span className="font-semibold mr-2">Explanation:</span> 
+                      {quizData[currentQ].explanation}
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Actions */}
+            <div className="flex justify-end pt-2 border-t border-[#E8E1D8] dark:border-dark-border">
+              {!showResult ? (
+                <button 
+                  onClick={handleSubmit} 
+                  disabled={selected === null}
+                  className="btn-primary disabled:opacity-50"
+                >
+                  Submit Answer
+                </button>
+              ) : (
+                <button onClick={handleNext} className="btn-primary">
+                  {currentQ < quizData.length - 1 ? 'Next Question' : 'View Results'}
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Results Report */
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-2xl">
+          <div className="card p-8 md:p-12 text-center space-y-8">
+            <div className="mx-auto w-20 h-20 bg-[#faefd9] text-[#C77D30] rounded-full flex items-center justify-center">
+              <Award className="w-10 h-10" />
+            </div>
+            
+            <div>
+              <h2 className="text-display text-3xl font-semibold mb-2">Assessment Complete</h2>
+              <p className="text-ink-muted">Here is your performance breakdown for the {currentSkill} quiz.</p>
+            </div>
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-surface-raised dark:bg-dark-card p-4 rounded-lg border border-[#E8E1D8] dark:border-dark-border">
+                <Target className="w-5 h-5 text-amber-600 mb-2 mx-auto" />
+                <div className="text-2xl font-bold font-fraunces text-ink dark:text-[#EDE8DF]">{correctCount} <span className="text-sm font-inter text-ink-muted">/ {quizData.length}</span></div>
+                <div className="text-xs font-medium uppercase tracking-wider text-ink-muted mt-1">Correct Answers</div>
+              </div>
+              <div className="bg-surface-raised dark:bg-dark-card p-4 rounded-lg border border-[#E8E1D8] dark:border-dark-border">
+                <BarChart2 className="w-5 h-5 text-amber-600 mb-2 mx-auto" />
+                <div className="text-2xl font-bold font-fraunces text-ink dark:text-[#EDE8DF]">{accuracyPercent}%</div>
+                <div className="text-xs font-medium uppercase tracking-wider text-ink-muted mt-1">Accuracy</div>
+              </div>
+            </div>
+
+            <div className="bg-[#faefd9] dark:bg-amber-900/20 p-4 rounded-lg">
+              <p className="text-amber-900 dark:text-amber-200 text-sm font-medium">
+                You earned <strong className="text-amber-700 dark:text-amber-400">{score} points</strong>. 
+                These have been added to your Global and {currentSkill} leaderboard rankings!
+              </p>
+            </div>
+            
+            <div className="pt-6 border-t border-[#E8E1D8] dark:border-dark-border flex flex-col sm:flex-row justify-center gap-3">
+              <button onClick={() => setQuizStarted(false)} className="btn-secondary">
+                <RefreshCcw className="w-4 h-4" /> Take Another Quiz
+              </button>
+              <a href="/leaderboard" className="btn-primary">
+                View Leaderboard
+              </a>
+            </div>
           </div>
         </motion.div>
       )}
