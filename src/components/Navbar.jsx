@@ -37,7 +37,10 @@ const Navbar = ({ setSidebarOpen }) => {
   const isAuthenticated = localStorage.getItem('ai_skillverse_auth') === 'true';
   const role = localStorage.getItem('ai_skillverse_role');
 
-  const visibleLinks = navLinks;
+  const visibleLinks = navLinks.filter(l => {
+    if (l.name === 'Admin' && role !== 'admin') return false;
+    return true;
+  });
 
   return (
     <nav className={`navbar transition-shadow duration-200 z-50 fixed top-0 w-full ${scrolled ? 'shadow-card' : ''}`}>
