@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Sun, Moon, BrainCircuit, LayoutDashboard } from 'lucide-react';
 
-const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const Navbar = ({ setSidebarOpen }) => {
   const [isDark, setIsDark] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
@@ -30,17 +29,7 @@ const Navbar = () => {
 
   const navLinks = [
     { name: 'Home',       path: '/home' },
-    { name: 'Roadmap',    path: '/roadmap' },
-    { name: 'Resume',     path: '/career-tools' },
-    { name: 'Skills',     path: '/skills' },
-    { name: 'Quizzes',    path: '/quizzes' },
-    { name: 'Interviews', path: '/mock-interviews' },
-    { name: 'PYQs',       path: '/pyqs' },
-    { name: 'AI Mentor',  path: '/ai-mentor' },
-    { name: 'Playground', path: '/playground' },
-    { name: 'News',       path: '/daily-updates' },
-    { name: 'AI Trends',  path: '/gen-ai-trends' },
-    { name: 'AI Tech',    path: '/latest-ai' },
+    { name: 'Dashboard',  path: '/dashboard' },
     { name: 'Admin',      path: '/admin' },
   ];
 
@@ -54,20 +43,32 @@ const Navbar = () => {
   });
 
   return (
-    <nav className={`navbar transition-shadow duration-200 ${scrolled ? 'shadow-card' : ''}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+    <nav className={`navbar transition-shadow duration-200 z-50 fixed top-0 w-full ${scrolled ? 'shadow-card' : ''}`}>
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
 
-        {/* Logo */}
-        <Link to={isAuthenticated ? '/home' : '/'} className="flex items-center gap-2">
-          <BrainCircuit className="w-6 h-6 text-amber-500" />
-          <span className="font-fraunces font-semibold text-lg text-ink dark:text-[#EDE8DF] tracking-tight">
-            AI SkillVerse
-          </span>
-        </Link>
+        {/* Logo and Mobile Toggle */}
+        <div className="flex items-center gap-3">
+          {isAuthenticated && (
+            <button
+              onClick={() => setSidebarOpen(prev => !prev)}
+              className="lg:hidden p-1.5 -ml-2 text-ink-muted hover:text-ink hover:bg-surface-raised dark:text-dark-muted dark:hover:text-[#EDE8DF] dark:hover:bg-dark-card rounded-md transition-colors"
+              aria-label="Toggle Sidebar"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          )}
+          
+          <Link to={isAuthenticated ? '/home' : '/'} className="flex items-center gap-2">
+            <BrainCircuit className="w-6 h-6 text-amber-500" />
+            <span className="font-fraunces font-semibold text-lg text-ink dark:text-[#EDE8DF] tracking-tight">
+              AI SkillVerse
+            </span>
+          </Link>
+        </div>
 
         {/* Desktop Nav Links */}
         {isAuthenticated && (
-          <div className="hidden lg:flex items-center gap-1">
+          <div className="hidden lg:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
             {visibleLinks.map((link) => (
               <Link
                 key={link.name}
@@ -97,59 +98,13 @@ const Navbar = () => {
             }
           </button>
 
-          {isAuthenticated ? (
-            <Link to="/dashboard" className="btn-primary hidden sm:inline-flex">
-              <LayoutDashboard className="w-4 h-4" />
-              Dashboard
-            </Link>
-          ) : (
+          {!isAuthenticated && (
             <Link to="/" className="btn-primary hidden sm:inline-flex">
               Sign in
             </Link>
           )}
-
-          {/* Mobile toggle */}
-          {isAuthenticated && (
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="lg:hidden btn-ghost p-2"
-              aria-label="Menu"
-            >
-              {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          )}
         </div>
       </div>
-
-      {/* Mobile Dropdown */}
-      {isOpen && isAuthenticated && (
-        <div className="lg:hidden border-t border-[#E8E1D8] dark:border-dark-border bg-paper dark:bg-dark-paper shadow-elevated">
-          <div className="max-w-7xl mx-auto px-4 py-3 grid grid-cols-2 gap-1">
-            {visibleLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                onClick={() => setIsOpen(false)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                  ${isActive(link.path)
-                    ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
-                    : 'text-ink-muted hover:bg-surface-raised dark:text-dark-muted dark:hover:bg-dark-card'
-                  }`}
-              >
-                {link.name}
-              </Link>
-            ))}
-            <Link
-              to="/dashboard"
-              onClick={() => setIsOpen(false)}
-              className="btn-primary col-span-2 mt-2"
-            >
-              <LayoutDashboard className="w-4 h-4" />
-              Dashboard
-            </Link>
-          </div>
-        </div>
-      )}
     </nav>
   );
 };
