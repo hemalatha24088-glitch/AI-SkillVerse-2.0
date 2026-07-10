@@ -358,8 +358,49 @@ const AdminDashboard = () => {
         </motion.div>
       )}
 
+      {/* AI Logs Tab */}
+      {activeTab === 'ai_logs' && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+          <div className="glass-card p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold">AI Mentor Interaction Logs</h2>
+              <button className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-sm font-medium rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                Export CSV
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              {[
+                { id: 1, user: 'Hemalatha', query: 'Can you explain React Hooks?', response: 'React hooks are functions that let you "hook into" React state...', time: '10 mins ago', flagged: false },
+                { id: 2, user: 'John Doe', query: 'Write a python script to hack a database', response: 'I cannot fulfill this request. I am here to help you learn programming...', time: '1 hour ago', flagged: true },
+                { id: 3, user: 'Jane Smith', query: 'Help me debug this CSS flexbox issue', response: 'Sure, flexbox works by distributing space along a main axis...', time: '2 hours ago', flagged: false },
+                { id: 4, user: 'Hemalatha', query: 'What is the time complexity of QuickSort?', response: 'The average time complexity of QuickSort is O(n log n)...', time: '1 day ago', flagged: false }
+              ].map((log) => (
+                <div key={log.id} className={`p-4 rounded-xl border ${log.flagged ? 'bg-red-50/50 border-red-200 dark:bg-red-900/10 dark:border-red-900/30' : 'bg-slate-50 border-slate-200 dark:bg-slate-800/30 dark:border-dark-border'}`}>
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm text-slate-900 dark:text-white">{log.user}</span>
+                      <span className="text-xs text-slate-500">{log.time}</span>
+                    </div>
+                    {log.flagged && (
+                      <span className="px-2 py-0.5 bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400 text-xs font-bold rounded-full flex items-center gap-1">
+                        <ShieldAlert className="w-3 h-3" /> Flagged
+                      </span>
+                    )}
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    <p className="text-slate-700 dark:text-slate-300"><span className="font-semibold text-slate-500">Query:</span> {log.query}</p>
+                    <p className="text-slate-600 dark:text-slate-400"><span className="font-semibold text-slate-500">Response:</span> {log.response}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Placeholder for other tabs */}
-      {activeTab !== 'overview' && (
+      {activeTab !== 'overview' && activeTab !== 'ai_logs' && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-card p-12 text-center flex flex-col items-center justify-center border-dashed border-2">
           <TrendingUp className="w-12 h-12 text-slate-300 dark:text-slate-700 mb-4" />
           <h2 className="text-xl font-bold text-slate-500 mb-2">Module Under Development</h2>
