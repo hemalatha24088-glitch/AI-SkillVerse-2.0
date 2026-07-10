@@ -51,6 +51,10 @@ const Leaderboard = () => {
         <p className="text-slate-600 dark:text-slate-400">
           Complete quizzes and practice coding to earn points and climb the ranks!
         </p>
+        <div className="mt-3 inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 text-amber-700 dark:text-amber-300 text-xs font-medium px-4 py-2 rounded-full">
+          <span>⚠️</span>
+          <span>Scores are stored locally in your browser — this is a demo leaderboard, not a live global ranking.</span>
+        </div>
       </div>
 
       <div className="flex flex-wrap justify-center gap-2 mb-8">
