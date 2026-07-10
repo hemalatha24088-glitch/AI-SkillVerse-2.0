@@ -51,7 +51,7 @@ const Navbar = ({ setSidebarOpen }) => {
           {isAuthenticated && (
             <button
               onClick={() => setSidebarOpen(prev => !prev)}
-              className="lg:hidden p-1.5 -ml-2 text-ink-muted hover:text-ink hover:bg-surface-raised dark:text-dark-muted dark:hover:text-[#EDE8DF] dark:hover:bg-dark-card rounded-md transition-colors"
+              className="p-1.5 -ml-2 text-ink-muted hover:text-ink hover:bg-surface-raised dark:text-dark-muted dark:hover:text-[#EDE8DF] dark:hover:bg-dark-card rounded-md transition-colors"
               aria-label="Toggle Sidebar"
             >
               <Menu className="w-5 h-5" />

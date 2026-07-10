@@ -41,18 +41,18 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       {/* Mobile Overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-ink/50 dark:bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-ink/50 dark:bg-black/50 z-40"
           onClick={() => setIsOpen(false)}
         />
       )}
 
       {/* Sidebar Container */}
       <aside 
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-surface border-r border-[#E8E1D8] dark:border-dark-border transform transition-transform duration-300 ease-in-out flex flex-col h-[calc(100vh-3.5rem)] mt-14 lg:mt-0 lg:h-full lg:translate-x-0
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-surface border-r border-[#E8E1D8] dark:border-dark-border transform transition-transform duration-300 ease-in-out flex flex-col h-[calc(100vh-3.5rem)] mt-14
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-          <div className="lg:hidden flex justify-end mb-2">
+          <div className="flex justify-end mb-2">
             <button 
               onClick={() => setIsOpen(false)}
               className="p-2 text-ink-muted hover:text-ink dark:text-dark-muted dark:hover:text-[#EDE8DF]"
