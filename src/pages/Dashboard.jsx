@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, Target, Flame, Trophy, BookOpen, Star, LogOut } from 'lucide-react';
+import { User, Target, Flame, Trophy, BookOpen, Star, LogOut, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const [points, setPoints] = useState(0);
+  const [activities, setActivities] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -13,8 +14,19 @@ const Dashboard = () => {
       navigate('/auth');
       return;
     }
+    
+    // Load points
     const savedPoints = localStorage.getItem('ai_skillverse_points');
     if (savedPoints) setPoints(parseInt(savedPoints));
+
+    // Load recent activity specific to this user
+    try {
+      const savedActivities = JSON.parse(localStorage.getItem('ai_skillverse_recent_activity') || '[]');
+      setActivities(savedActivities);
+    } catch (e) {
+      setActivities([]);
+    }
+
   }, [navigate]);
 
   const handleLogout = () => {
@@ -23,89 +35,105 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="pb-20 pt-10 max-w-5xl mx-auto">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+    <div className="page-container pt-24 pb-20">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4 border-b border-[#E8E1D8] dark:border-dark-border pb-6">
         <div>
-          <motion.h1 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="text-3xl font-bold">
-            Welcome back, <span className="text-gradient">Student</span>
-          </motion.h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-1">Here is your learning progress overview.</p>
+          <span className="tag mb-3">Student Dashboard</span>
+          <h1 className="text-display text-3xl md:text-4xl font-semibold text-ink dark:text-[#EDE8DF]">
+            Welcome back
+          </h1>
+          <p className="text-ink-muted mt-2">Here is your learning progress overview.</p>
         </div>
-        <button onClick={handleLogout} className="btn-secondary flex items-center gap-2 py-2">
+        <button onClick={handleLogout} className="btn-secondary py-2 text-xs uppercase tracking-wider font-semibold">
           <LogOut className="w-4 h-4" /> Logout
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-6 flex items-center gap-4">
-          <div className="p-4 bg-orange-100 dark:bg-orange-900/30 text-orange-500 rounded-2xl">
-            <Flame className="w-8 h-8" />
+      {/* Stats Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="card p-6 flex items-center gap-4 bg-surface hover:-translate-y-1 transition-transform duration-200">
+          <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+            <Flame className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-slate-500 text-sm font-medium">Daily Streak</h3>
-            <p className="text-2xl font-bold">5 Days</p>
+            <h3 className="text-ink-muted text-xs font-semibold uppercase tracking-wider mb-1">Daily Streak</h3>
+            <p className="text-2xl font-bold font-fraunces text-ink dark:text-[#EDE8DF]">1 Day</p>
           </div>
-        </motion.div>
+        </div>
         
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card p-6 flex items-center gap-4">
-          <div className="p-4 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-500 rounded-2xl">
-            <Trophy className="w-8 h-8" />
+        <div className="card p-6 flex items-center gap-4 bg-surface hover:-translate-y-1 transition-transform duration-200">
+          <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+            <Trophy className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-slate-500 text-sm font-medium">Total Points</h3>
-            <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">{points}</p>
+            <h3 className="text-ink-muted text-xs font-semibold uppercase tracking-wider mb-1">Total Points</h3>
+            <p className="text-2xl font-bold font-fraunces text-amber-600">{points}</p>
           </div>
-        </motion.div>
+        </div>
         
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-card p-6 flex items-center gap-4">
-          <div className="p-4 bg-green-100 dark:bg-green-900/30 text-green-500 rounded-2xl">
-            <Target className="w-8 h-8" />
+        <div className="card p-6 flex items-center gap-4 bg-surface hover:-translate-y-1 transition-transform duration-200">
+          <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 flex items-center justify-center shrink-0">
+            <Target className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-slate-500 text-sm font-medium">Quizzes Completed</h3>
-            <p className="text-2xl font-bold">12</p>
+            <h3 className="text-ink-muted text-xs font-semibold uppercase tracking-wider mb-1">Assessments</h3>
+            <p className="text-2xl font-bold font-fraunces text-ink dark:text-[#EDE8DF]">
+              {activities.filter(a => a.title.includes('Quiz')).length}
+            </p>
           </div>
-        </motion.div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }} className="glass-card p-6">
-          <h2 className="text-xl font-bold mb-6 flex items-center gap-2"><BookOpen className="w-5 h-5 text-primary-500" /> Recent Activity</h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-              <div>
-                <p className="font-medium">Python Basics Quiz</p>
-                <p className="text-xs text-slate-500">2 hours ago</p>
-              </div>
-              <span className="text-green-500 font-medium">+30 pts</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-              <div>
-                <p className="font-medium">Solved TCS PYQ - Arrays</p>
-                <p className="text-xs text-slate-500">Yesterday</p>
-              </div>
-              <span className="text-green-500 font-medium">+50 pts</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-              <div>
-                <p className="font-medium">Read Gen AI Notes</p>
-                <p className="text-xs text-slate-500">2 days ago</p>
-              </div>
-              <span className="text-green-500 font-medium">+10 pts</span>
-            </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Recent Activity */}
+        <div className="lg:col-span-2 card p-6 md:p-8 bg-surface">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold font-fraunces flex items-center gap-2 text-ink dark:text-[#EDE8DF]">
+              <BookOpen className="w-5 h-5 text-amber-500" /> Your Recent Activity
+            </h2>
           </div>
-        </motion.div>
+          
+          <div className="space-y-3">
+            {activities.length > 0 ? (
+              activities.map((activity, idx) => (
+                <div key={idx} className="flex items-center justify-between p-4 bg-[#F5F1EB] dark:bg-dark-card border border-[#E8E1D8] dark:border-dark-border rounded-lg">
+                  <div>
+                    <p className="font-medium text-ink dark:text-[#EDE8DF]">{activity.title}</p>
+                    <p className="text-xs text-ink-muted mt-1">{activity.time}</p>
+                  </div>
+                  <span className="text-success font-semibold bg-success-light dark:bg-success/20 px-3 py-1 rounded-full text-sm">
+                    {activity.points}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="text-center p-8 border-2 border-dashed border-[#E8E1D8] dark:border-dark-border rounded-xl">
+                <p className="text-ink-muted mb-4">No recent activity yet. Start taking quizzes to earn points!</p>
+                <button onClick={() => navigate('/quizzes')} className="btn-secondary">
+                  Take an Assessment
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
 
-        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }} className="glass-card p-6 bg-gradient-to-br from-primary-600 to-purple-700 text-white border-none">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Star className="w-5 h-5 text-yellow-300 fill-current" /> Recommended Next Skill</h2>
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mt-4 border border-white/20">
-            <h3 className="text-2xl font-bold mb-2">Prompt Engineering</h3>
-            <p className="text-primary-100 mb-6 text-sm">Based on your interest in Generative AI, learning Prompt Engineering will help you get 10x better results from LLMs.</p>
-            <a href="/skills" className="px-6 py-2 bg-white text-primary-700 font-bold rounded-full hover:bg-slate-10 transition-colors inline-block text-sm">
-              Start Learning
-            </a>
+        {/* Recommended Card */}
+        <div className="lg:col-span-1 card p-8 bg-amber-600 text-white border-none flex flex-col justify-between">
+          <div>
+            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center mb-6">
+              <Star className="w-5 h-5 text-white fill-current" /> 
+            </div>
+            <h2 className="text-xl font-bold font-fraunces mb-2">Recommended Next Skill</h2>
+            <h3 className="text-3xl font-bold font-fraunces mb-4">Prompt Engineering</h3>
+            <p className="text-amber-100 text-sm leading-relaxed mb-8">
+              Based on your interest in Generative AI, learning Prompt Engineering will help you get 10x better results from LLMs.
+            </p>
           </div>
-        </motion.div>
+          <a href="/skills" className="w-full py-3 bg-white text-amber-700 font-semibold rounded-lg hover:bg-[#F5F1EB] transition-colors inline-flex justify-center items-center gap-2">
+            Start Learning <ArrowRight className="w-4 h-4" />
+          </a>
+        </div>
       </div>
     </div>
   );

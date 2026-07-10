@@ -129,6 +129,17 @@ const QuizSystem = () => {
         }
         localStorage.setItem('ai_skillverse_users', JSON.stringify(users));
       }
+      
+      // Log to Recent Activity
+      const activities = JSON.parse(localStorage.getItem('ai_skillverse_recent_activity') || '[]');
+      activities.unshift({
+        title: `${currentSkill} Quiz Completed`,
+        time: 'Just now',
+        points: `+${score} pts`
+      });
+      // Keep only last 5 activities
+      if (activities.length > 5) activities.pop();
+      localStorage.setItem('ai_skillverse_recent_activity', JSON.stringify(activities));
     }
   };
 
